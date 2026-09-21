@@ -1,95 +1,246 @@
- Movie Recommendation System
+# 🎬 Movie Recommendation System
 
-A full-stack movie recommendation system built using Item-Based Collaborative Filtering on the MovieLens dataset. The project includes a Python backend (FastAPI) serving recommendations via REST API and a React frontend for user interaction.
+A full-stack movie recommendation system built using **Item-Based Collaborative Filtering** on the MovieLens dataset. The project mines ~100,000 user ratings to suggest movies similar to a given title, and serves them through a **FastAPI** backend and a **React** frontend.
 
-📌 Project Overview
+---
 
-With thousands of movies available across streaming platforms, users often struggle to decide what to watch. This project builds a recommendation engine that suggests movies similar to one the user already likes, based purely on historical rating data.
+## 📌 Table of Contents
 
-Core idea: Two movies are similar if the same users rated them similarly.
+- [Overview](#-overview)
+- [Problem Statement](#-problem-statement)
+- [Dataset](#-dataset)
+- [Methodology](#-methodology)
+- [Tech Stack](#-tech-stack)
+- [Project Structure](#-project-structure)
+- [Installation](#-installation)
+- [Usage](#-usage)
+- [Pipeline](#-pipeline)
+- [Evaluation](#-evaluation)
+- [Results](#-results)
+- [Limitations](#-limitations)
+- [Future Work](#-future-work)
+- [Author](#-author)
 
-🎯 Objectives
+---
 
-Build a working movie recommender using collaborative filtering. Handle sparse real-world rating data effectively. Serve recommendations through a REST API. Provide a simple, interactive React UI. Document methodology for academic evaluation.
+## 🧭 Overview
 
-📂 Dataset
+With thousands of movies available across streaming platforms, users often struggle to find something worth watching. This project builds a recommendation engine that suggests movies similar to one the user already likes, based purely on historical rating data.
 
-Source: MovieLens ml-latest-small — GroupLens Research, University of Minnesota.
+The system uses **Item-Based Collaborative Filtering** — the idea that *"if two movies were rated similarly by the same users, they are similar."* Similarity is measured using **Cosine Similarity** between movie rating vectors.
 
-Files: ratings.csv (userId, movieId, rating, timestamp), movies.csv (movieId, title, genres), links.csv (movieId, imdbId, tmdbId), tags.csv (userId, movieId, tag, timestamp).
+---
 
-Size: approximately 100,000 ratings, 610 users, 9,700 movies.
+## ❓ Problem Statement
 
-Why this dataset: Free and publicly available. Clean, no missing values in key columns. Standard benchmark for recommender systems. Small enough to run locally, large enough to be realistic.
+> Given a movie title, recommend the Top-N most similar movies using only historical user ratings, and serve these recommendations through a modern full-stack application.
 
-🧠 Methodology
+---
 
-Approach: Item-Based Collaborative Filtering (IBCF).
+## 📊 Dataset
 
-Why Item-Based instead of User-Based: More stable because movie tastes change slower than user tastes. Scalable because there are usually fewer items than users. Explainable because "Because you liked X, here is Y" is intuitive. Better with sparse data because item similarities are more reliable than user similarities.
+**Source:** [MovieLens `ml-latest-small`](https://grouplens.org/datasets/movielens/) — GroupLens Research, University of Minnesota
 
-Mathematical Technique: Cosine Similarity. similarity(A, B) = (A · B) / (||A|| × ||B||). Ranges from 0 (not similar) to 1 (identical). Computed for every pair of movies giving a ~9,700 × 9,700 matrix.
+| Attribute | Value |
+|-----------|-------|
+| Ratings | ~100,000 |
+| Users | ~610 |
+| Movies | ~9,700 |
+| Rating Scale | 0.5 – 5.0 |
+| Sparsity | ~98% |
 
-Recommendation Logic: User inputs a movie title. Find its movieId in the dataset. Look up its row in the similarity matrix. Sort other movies by similarity score descending. Drop the movie itself. Return the Top-N most similar movies with their genres.
+**Files used:**
 
-🛠️ Tech Stack
+- `ratings.csv` → `userId`, `movieId`, `rating`, `timestamp`
+- `movies.csv` → `movieId`, `title`, `genres`
 
-Data Processing: Python, Pandas, NumPy. ML / Mining: Scikit-learn cosine_similarity. Model Storage: Pickle (.pkl). Visualization: Matplotlib. Backend API: FastAPI. Frontend: React (Vite). Dev Environment: VS Code, Jupyter Notebook.
+**Why this dataset?**
 
+- Free, clean, and has no missing values
+- Standard benchmark in recommender systems research
+- Small enough to run on a laptop, large enough to be realistic
+
+---
+
+## 🧠 Methodology
+
+### Chosen Approach: **Item-Based Collaborative Filtering (IBCF)**
+
+**Why Item-Based instead of User-Based?**
+
+| Reason | Explanation |
+|--------|-------------|
+| More stable | Movie tastes change slower than user tastes |
+| Scalable | Fewer items than users in most systems |
+| Explainable | "Because you liked X, here is Y" is intuitive |
+| Better with sparse data | Item similarities are more reliable than user similarities |
+
+### Core Idea
+
+> Two movies are similar if the same users rated them similarly.
+
+### Mathematical Technique: Cosine Similarity
+similarity(A, B) = (A · B) / (||A|| × ||B||)
+
+text
+
+- Ranges from **0** (not similar) to **1** (identical)
+- Computed for **every pair of movies** → a ~9,700 × 9,700 similarity matrix
+
+### Recommendation Logic
+
+1. User inputs a movie title
+2. Find its `movieId` in the dataset
+3. Look up its row in the similarity matrix
+4. Sort other movies by similarity score (descending)
+5. Drop the movie itself
+6. Return the **Top-N** most similar movies with their genres
+
+---
+
+## 🛠 Tech Stack
+
+| Layer | Technology | Purpose |
+|-------|-----------|---------|
+| Data Processing | Python, Pandas, NumPy | Load, clean, pivot data |
+| ML / Mining | Scikit-learn (`cosine_similarity`) | Compute similarity matrix |
+| Model Storage | Pickle (`.pkl`) | Cache the matrix for fast loading |
+| Visualization | Matplotlib | Rating distribution charts |
+| Backend API | FastAPI (or Flask) | Serve recommendations as JSON |
+| Frontend | React (Vite) | Search bar + movie cards UI |
+| Dev Environment | VS Code, Jupyter Notebook | Build and test |
+
+---
+
+## 📁 Project Structure
+movie-recommender/
+├── data/
+│ └── ml-latest-small/
+│ ├── ratings.csv
+│ ├── movies.csv
+│ ├── links.csv
+│ └── tags.csv
+├── notebooks/
+│ └── explore.ipynb # Data exploration + model building
+├── backend/
+│ ├── build_model.py # Trains + saves pickle
+│ ├── app.py # FastAPI server
+│ └── model.pkl # Saved similarity matrix
+├── frontend/ # React (Vite) app
+│ ├── src/
+│ └── package.json
+└── README.md
+
+text
+
+---
+
+## ⚙️ Installation
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/your-username/movie-recommender.git
+cd movie-recommender
+2. Download the dataset
+Download ml-latest-small.zip from GroupLens and extract it into data/.
+
+3. Install Python dependencies
+bash
+pip install pandas numpy scikit-learn matplotlib fastapi uvicorn flask flask-cors
+4. Install frontend dependencies
+bash
+cd frontend
+npm install
+🚀 Usage
+Build the model (once)
+bash
+cd backend
+python build_model.py
+This creates model.pkl containing the similarity matrix and movie metadata.
+
+Start the backend
+bash
+uvicorn app:app --reload --port 5000
+API endpoints:
+
+GET /movies → list of all movie titles
+
+GET /recommend?title=Toy%20Story%20(1995) → Top-N recommendations
+
+Start the frontend
+bash
+cd frontend
+npm run dev
+Open http://localhost:3000 in your browser.
+
+Test the recommender directly (notebook)
+python
+recommend("Toy Story (1995)")
+recommend("Matrix, The (1999)")
 🔄 Pipeline
+text
+[1] Download MovieLens dataset
+        ↓
+[2] Load ratings.csv + movies.csv (Pandas)
+        ↓
+[3] Explore: shape, unique users, rating distribution, sparsity
+        ↓
+[4] Pivot → User × Movie matrix (fill NaN with 0)
+        ↓
+[5] Transpose → Movie × User matrix
+        ↓
+[6] Compute Cosine Similarity → Movie × Movie matrix
+        ↓
+[7] Save model as model.pkl
+        ↓
+[8] FastAPI backend loads .pkl and exposes /recommend
+        ↓
+[9] React frontend calls API and displays Top-N movies
+        ↓
+[10] Demo: user types "Toy Story (1995)" → gets recommendations
+📈 Evaluation
+Qualitative Evaluation
+Input: Toy Story (1995) → Output: A Bug's Life, Aladdin, Lion King ✅
 
-Step 1: Download MovieLens dataset. Step 2: Load ratings.csv and movies.csv with Pandas. Step 3: Explore shape, unique users, rating distribution, sparsity. Step 4: Pivot into User × Movie matrix, fill NaN with 0. Step 5: Transpose into Movie × User matrix. Step 6: Compute Cosine Similarity into Movie × Movie matrix. Step 7: Save model as model.pkl. Step 8: FastAPI backend loads .pkl and exposes /recommend. Step 9: React frontend calls API and displays Top-N movies. Step 10: Demo with a title like Toy Story (1995) returning recommendations.
+Input: Matrix, The (1999) → Output: Terminator, Star Wars, Inception ✅
 
-📁 Project Structure
+Genre overlap confirms the model learned meaningful patterns
 
-movie-recommender/ contains data/ml-latest-small/ with ratings.csv, movies.csv, links.csv, tags.csv. notebooks/explore.ipynb for exploration and model building. backend/ with model.py, build_model.py, app.py, model.pkl. frontend/ for the React app. README.md.
+Quantitative Metrics (future work)
+RMSE — Root Mean Squared Error on held-out ratings
 
-🚀 Getting Started
-
-Clone the repository: git clone <your-repo-url> then cd movie-recommender.
-
-Install Python dependencies: pip install pandas numpy scikit-learn matplotlib fastapi uvicorn.
-
-Download the dataset from grouplens.org and extract into data/.
-
-Build the model: run notebooks/explore.ipynb or cd backend && python build_model.py. This generates model.pkl.
-
-Start the backend: uvicorn app:app --reload --port 8000. API at http://localhost:8000.
-
-Start the frontend: cd frontend && npm install && npm run dev. Frontend at http://localhost:5173.
-
-🔌 API Endpoints
-
-GET /movies returns list of all movie titles. GET /recommend?title=Inception (2010)&n=10 returns Top-N similar movies. Example response: a JSON array with title and genres fields.
-
-📊 Evaluation
-
-Qualitative: Toy Story (1995) returns A Bug's Life, Aladdin, Lion King. Matrix, The (1999) returns Terminator, Star Wars, Inception. Genre overlap confirms the model learned meaningful patterns.
-
-Quantitative (Future Work): RMSE on held-out ratings, Precision@K and Recall@K.
+Precision@K / Recall@K — how many of the Top-K recommendations were relevant
 
 ✅ Results
+Built a working recommendation engine using collaborative filtering
 
-Built a working recommendation engine using collaborative filtering. Handled 98% sparse data effectively. Produced genre-consistent recommendations. Deployed as a full-stack app.
+Handled ~98% sparse data effectively
+
+Model produces genre-consistent recommendations
+
+Deployed as a full-stack app (Python API + React UI)
 
 ⚠️ Limitations
+Cold start problem: Cannot recommend for new users or new movies with no ratings
 
-Cold start problem for new users or movies with no ratings. Popularity bias toward popular movies. No personalization per user in this version.
+Popularity bias: Popular movies tend to dominate recommendations
+
+No personalization per user in this version — recommendations depend only on the input movie
 
 🔮 Future Work
+Hybrid approach: combine collaborative filtering + content-based (genres, plot, tags)
 
-Hybrid approach combining collaborative filtering with content-based filtering. Add user personalization using matrix factorization or SVD. Cache recommendations with Redis. Add movie posters via TMDB API. Deploy to Render, Vercel, or Railway.
+Add user personalization (matrix factorization, SVD, or neural embeddings)
 
-📚 References
+Cache recommendations with Redis for performance
 
-MovieLens Dataset at grouplens.org. Scikit-learn Cosine Similarity documentation. Sarwar et al. (2001) Item-Based Collaborative Filtering Recommendation Algorithms. Linden et al. (2003) Amazon.com Recommendations: Item-to-Item Collaborative Filtering.
+Deploy to cloud (Render / Vercel / Railway)
 
 👤 Author
+Your Name
+Course: Data Mining
+Institution: Your School / University
 
-Your Name. Course: Data Mining. Institution: Your School. Year: 2025.
-
-📄 License
-
-This project is for educational purposes only. The MovieLens dataset is provided by GroupLens Research under their own terms of use.
-
-
+📜 License
+This project uses the MovieLens dataset, which is provided by GroupLens Research under their own terms of use. The code in this repository is free to use for educational purposes.
